@@ -14,7 +14,7 @@ if not firebase_admin._apps:
 db = firestore.client()
 SECRET_KEY = "arbab_rewards_secure_key_99"
 
-# 1. Postback Endpoint
+# Postback Endpoint using direct safe updates (No transaction crashes)
 @app.route('/postback', methods=['GET'])
 def postback():
     userid = request.args.get('userid')
@@ -34,37 +34,30 @@ def postback():
 
     try:
         user_ref = db.collection('users').document(userid)
+        user_snapshot = user_ref.get()
 
-        # Firestore Transaction to update balance and log transaction safely
-        @firestore.transactional
-        def update_in_transaction(transaction, user_ref, reward_amount, userid):
-            user_snapshot = user_ref.get(transaction=transaction)
-            if not user_snapshot.exists:
-                raise Exception("User not found in Firestore database")
-            
-            user_data = user_snapshot.to_dict()
-            current_balance = user_data.get('availableBalance', 0)
-            current_total = user_data.get('totalEarnings', 0)
+        if not user_snapshot.exists:
+            return jsonify({"error": "User not found in Firestore database"}), 404
 
-            # Update balances
-            transaction.update(user_ref, {
-                'availableBalance': current_balance + reward_amount,
-                'totalEarnings': current_total + reward_amount,
-                'lastUpdated': firestore.SERVER_TIMESTAMP
-            })
+        user_data = user_snapshot.to_dict()
+        current_balance = user_data.get('availableBalance', 0)
+        current_total = user_data.get('totalEarnings', 0)
 
-            # Add ledger entry
-            tx_ref = db.collection('transactions').document()
-            transaction.set(tx_ref, {
-                'userId': userid,
-                'type': 'external_postback',
-                'amount': reward_amount,
-                'description': 'Earned via external postback offer/task',
-                'createdAt': firestore.SERVER_TIMESTAMP
-            })
+        # 1. Update user balance directly
+        user_ref.update({
+            'availableBalance': current_balance + reward_amount,
+            'totalEarnings': current_total + reward_amount,
+            'lastUpdated': firestore.SERVER_TIMESTAMP
+        })
 
-        transaction = db.transaction()
-        update_in_transaction(transaction, user_ref, reward_amount, userid)
+        # 2. Add transaction ledger entry
+        db.collection('transactions').add({
+            'userId': userid,
+            'type': 'external_postback',
+            'amount': reward_amount,
+            'description': 'Earned via external postback offer/task',
+            'createdAt': firestore.SERVER_TIMESTAMP
+        })
 
         return "SUCCESS: Balance credited and logged successfully.", 200
 
@@ -72,7 +65,7 @@ def postback():
         print("Postback Processing Error:", err)
         return jsonify({"error": str(err)}), 500
 
-# 2. Health Check Route
+# Health Check Route
 @app.route('/', methods=['GET'])
 def home():
     return "Rewards Hub Python Backend Server is Running Live & Secure!", 200
