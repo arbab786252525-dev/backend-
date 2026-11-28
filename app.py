@@ -7,10 +7,13 @@ import hashlib
 app = Flask(__name__)
 CORS(app)
 
-# Supabase Configuration (Using Anon/Publishable Key for Stable REST API)
+# Supabase Configuration
 SUPABASE_URL = "https://xhzicbwqkzqstuzukizs.supabase.co"
 SUPABASE_KEY = "Sb_publishable_50-wiYfCl-IXmUQoNTajUg_6ckJvjr1"
 SECRET_KEY = "arbab_rewards_secure_key_99"
+
+# Supabase Table Name (Url encoded space as %20)
+TABLE_NAME = "Arbab%20Hussain"
 
 @app.route('/', methods=['GET'])
 def home():
@@ -38,7 +41,7 @@ def signup():
     }).encode('utf-8')
 
     req = urllib.request.Request(
-        f"{SUPABASE_URL}/rest/v1/users",
+        f"{SUPABASE_URL}/rest/v1/{TABLE_NAME}",
         data=payload,
         headers={
             'apikey': SUPABASE_KEY,
@@ -69,7 +72,7 @@ def login():
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
     req = urllib.request.Request(
-        f"{SUPABASE_URL}/rest/v1/users?id=eq.{userid}&select=id,password,balance",
+        f"{SUPABASE_URL}/rest/v1/{TABLE_NAME}?id=eq.{userid}&select=id,password,balance",
         headers={
             'apikey': SUPABASE_KEY,
             'Authorization': f'Bearer {SUPABASE_KEY}'
@@ -109,7 +112,7 @@ def postback():
         return jsonify({"error": "Invalid parameters: 'userid' is required"}), 400
 
     fetch_req = urllib.request.Request(
-        f"{SUPABASE_URL}/rest/v1/users?id=eq.{userid}&select=balance,totalEarnings",
+        f"{SUPABASE_URL}/rest/v1/{TABLE_NAME}?id=eq.{userid}&select=balance,totalEarnings",
         headers={
             'apikey': SUPABASE_KEY,
             'Authorization': f'Bearer {SUPABASE_KEY}'
@@ -132,7 +135,7 @@ def postback():
                 }).encode('utf-8')
 
                 update_req = urllib.request.Request(
-                    f"{SUPABASE_URL}/rest/v1/users?id=eq.{userid}",
+                    f"{SUPABASE_URL}/rest/v1/{TABLE_NAME}?id=eq.{userid}",
                     data=update_payload,
                     headers={
                         'apikey': SUPABASE_KEY,
@@ -152,7 +155,7 @@ def postback():
                 }).encode('utf-8')
 
                 insert_req = urllib.request.Request(
-                    f"{SUPABASE_URL}/rest/v1/users",
+                    f"{SUPABASE_URL}/rest/v1/{TABLE_NAME}",
                     data=insert_payload,
                     headers={
                         'apikey': SUPABASE_KEY,
