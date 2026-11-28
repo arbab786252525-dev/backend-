@@ -10,7 +10,7 @@ CORS(app)
 # Supabase Configuration (Integrated)
 SUPABASE_URL = "https://xhzicbwqkzqstuzukizs.supabase.co"
 SUPABASE_KEY = "Sb_publishable_50-wiYfCl-IXmUQoNTajUg_6ckJvjr1"
-SECRET_KEY = "arbab_rewards_secure_key_99"
+SECRET_KEY = "sb_secret_6sEf5gllI3pzS7-6dBGv4g_NTQbNMxQ"
 
 @app.route('/', methods=['GET'])
 def home():
