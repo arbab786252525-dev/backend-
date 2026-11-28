@@ -11,8 +11,6 @@ CORS(app)
 SUPABASE_URL = "https://xhzicbwqkzqstuzukizs.supabase.co"
 SUPABASE_KEY = "Sb_publishable_50-wiYfCl-IXmUQoNTajUg_6ckJvjr1"
 SECRET_KEY = "arbab_rewards_secure_key_99"
-
-# Supabase Table Name (Url encoded space as %20)
 TABLE_NAME = "Arbab%20Hussain"
 
 @app.route('/', methods=['GET'])
@@ -176,4 +174,3 @@ def postback():
 
 if __name__ == '__main__':
     app.run(port=3000)
-    
