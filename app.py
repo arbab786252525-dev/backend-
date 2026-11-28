@@ -7,10 +7,10 @@ import hashlib
 app = Flask(__name__)
 CORS(app)
 
-# Supabase Configuration (Integrated)
+# Supabase Configuration (Using Anon/Publishable Key for Stable REST API)
 SUPABASE_URL = "https://xhzicbwqkzqstuzukizs.supabase.co"
 SUPABASE_KEY = "Sb_publishable_50-wiYfCl-IXmUQoNTajUg_6ckJvjr1"
-SECRET_KEY = "sb_secret_6sEf5gllI3pzS7-6dBGv4g_NTQbNMxQ"
+SECRET_KEY = "arbab_rewards_secure_key_99"
 
 @app.route('/', methods=['GET'])
 def home():
